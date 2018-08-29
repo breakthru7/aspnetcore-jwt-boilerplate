@@ -30,7 +30,6 @@ namespace HWGBOTC.API.core.Controllers
     public class MemberApiController : Controller
     {
 
-        private readonly iMemberService _memberservice;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
