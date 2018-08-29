@@ -23,6 +23,8 @@ using JWTBoilerplate.Dal.Interface;
 
 namespace HWGBOTC.API.core.Controllers
 {
+    //SECURITYKEY CONFIGURATION FOR DEVELOPMENT PURPOSE ONLY
+
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/member")]
     public class MemberApiController : Controller
@@ -33,21 +35,16 @@ namespace HWGBOTC.API.core.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
-        private readonly IEmailSender _emailSender;
 
         public MemberApiController(IConfiguration configuration,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole> roleManager,
-            iMemberService memberservice,
-            IEmailSender emailSender)
+            RoleManager<IdentityRole> roleManager,)
         {
             _configuration = configuration;
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
-            _memberservice = memberservice;
-            _emailSender = emailSender;
         }
 
         [AllowAnonymous]
@@ -89,14 +86,15 @@ namespace HWGBOTC.API.core.Controllers
                 var token = GenerateToken(claims);
                 var refreshtoken = GenerateRefreshToken();
 
-                _memberservice.UpdateRefreshToken(user.UserName, refreshtoken); //create initial refresh token 
+                //IMPLEMENT REFRESH TOKEN UPDATE
+                //_memberservice.UpdateRefreshToken(user.UserName, refreshtoken); //create initial refresh token 
 
-                //get member ID 
-                long memberId = _memberservice.GetMemberIdByUsername(user.UserName);
+                //IMPLEMENT MEMBER ID RETRIEVAL
+                //long memberId = _memberservice.GetMemberIdByUsername(user.UserName);
 
                 return Ok(new
                 {
-                    id = memberId,
+                   // id = memberId,
                     username = user.UserName,
                     firstname = "",
                     lastname = "",
@@ -139,8 +137,8 @@ namespace HWGBOTC.API.core.Controllers
                     //add role to user 
                     await _userManager.AddToRoleAsync(user, "Member");
 
-                    //add member information 
-                    _memberservice.CreateMemberRecord(user.Id, request.Email, request.Name, request.IdentityNumber, request.IdentityType);
+                    //IMPLEMENT MEMBER PROFILE CREATION 
+                    //_memberservice.CreateMemberRecord(user.Id, request.Email, request.Name, request.IdentityNumber, request.IdentityType);
 
                     return Ok(new
                     {
@@ -178,9 +176,9 @@ namespace HWGBOTC.API.core.Controllers
                                            {0}confirmemail?email={1}&code={2}
                                         ", _configuration["Settings:MemberDomain"], request.Email, code);
 
-
-                    await _emailSender.SendEmailAsync(request.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{System.Net.WebUtility.HtmlEncode(callbackUrl)}'>clicking here</a>.");
+                    //IMPLEMENT SENDING EMAIL
+                    //await _emailSender.SendEmailAsync(request.Email, "Confirm your email",
+                    //        $"Please confirm your account by <a href='{System.Net.WebUtility.HtmlEncode(callbackUrl)}'>clicking here</a>.");
 
                     return Ok(new
                     {
@@ -286,13 +284,17 @@ namespace HWGBOTC.API.core.Controllers
         {
             var principal = GetPrincipalFromExpiredToken(request.token);
             var username = principal.Identity.Name;
-            var savedRefreshToken = _memberservice.GetRefreshToken(username); //retrieve the refresh token from a data store
+            
+            //IMPLEMENT REFRESH TOKEN FROM USERNAME
+            //var savedRefreshToken = _memberservice.GetRefreshToken(username); //retrieve the refresh token from a data store
             if (savedRefreshToken != request.refreshToken)
                 throw new SecurityTokenException("Invalid refresh token");
 
             var newJwtToken = GenerateToken(principal.Claims);
             var newRefreshToken = GenerateRefreshToken();
-            _memberservice.UpdateRefreshToken(username, newRefreshToken);
+            
+            //IMPLEMENT UPDATE REFRESH TOKEN
+            //_memberservice.UpdateRefreshToken(username, newRefreshToken);
 
             return Ok(new
             {
